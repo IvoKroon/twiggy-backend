@@ -1,0 +1,72 @@
+//this files fills the database
+//Do this command to fill the database 'mongo twiggyData < database_filler.js'
+db.regions.insert([
+{
+    _id:1,
+    title:"plane"
+}
+]);
+
+db.items.insert([
+    {
+        _id:1,
+        title:"apple",
+        sprite:"apple.png",
+        sell_price:18,
+        buy_price:20,
+        diamond_price:1
+    }
+]);
+
+db.species.insert([
+    {
+        _id:1,
+        title:"apple",
+        sprite_map:"apple",
+        item_grow_rate:1,
+        item_id: 1
+    }
+]);
+
+db.states.insert([
+    {
+        _id:1,
+        sprite:"1.png",
+        energy:100,
+        water:1,
+        grow_speed:1,
+        item_grow_speed:1
+    },
+    {
+        _id:2,
+        sprite:"2.png",
+        energy:200,
+        water:1,
+        grow_speed:1,
+        item_grow_speed:1
+    },
+    {
+        _id:3,
+        sprite:"3.png",
+        energy:400,
+        water:1,
+        grow_speed:1,
+        item_grow_speed:1
+    },
+    {
+        _id:4,
+        sprite:"4.png",
+        energy:500,
+        water:1,
+        grow_speed:1,
+        item_grow_speed:1
+    },
+    {
+        _id:5,
+        sprite:"5.png",
+        energy:700,
+        water:1,
+        grow_speed:1,
+        item_grow_speed:1
+    }
+]);
