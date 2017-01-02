@@ -78,7 +78,61 @@ io.on('connection', function (socket, fn) {
     });
 
     socket.on('growButtonClick', function (data, fn) {
-        fn(true);
+        // Plant.find({},function (err, data) {
+        //     console.log(data);
+        // });
+        //TODO check if it is the last state.......?
+        var id = data.treeId;
+        console.log("tree id^");
+        console.log(data);
+        //find user
+        //get resources
+        //get date tree
+        //get next state
+        //check resources
+        //TRUE: update tree
+        //Send back true and the amount of energy that need to be subtract.
+        //handle the data on the fontside.
+        // gameLoop.clearGameLoop(loop);
+        // gameLoop.start
+        DemoUser.findOne({socket_id: socket.id})
+            .populate('resources_id')
+            .exec(function (err, user) {
+                Plant.findOne({_id: id})
+                    .populate('state_id')
+                    .exec(function (err, plant) {
+                        var coastEnergy = plant.state_id.energy;
+                        if (user.resources_id.energy > coastEnergy) {
+                            State.findOne({_id: plant.state_id._id + 1}, function (err, newState) {
+                                console.log(newState);
+
+                                user.resources_id.energy = user.resources_id.energy - coastEnergy;
+                                var resources = user.resources_id;
+                                var newEnergy = resources.energy;
+                                resources.energy = newEnergy - coastEnergy;
+                                resources.save(function (err, data) {
+                                    console.log(err);
+                                    console.log(data);
+                                    //TODO check if finale state.
+                                    plant.state_id = newState;
+                                    // console.log(plant);
+                                    plant.save(function (err, newPlant) {
+                                        console.log("new plant");
+                                        console.log(newPlant);
+                                        var returnData = {energy: coastEnergy, plant: newPlant, resources:resources};
+                                        fn(returnData);
+                                    });
+                                });
+                            });
+                        } else {
+                            console.log("NOT ENOUGH");
+                            fn(false);
+                        }
+
+                    });
+                // var energy = data.resources_id.energy
+            });
+
         //TODO check if tree is of the user
         //TODO check if there are enough resources
     });
@@ -86,26 +140,24 @@ io.on('connection', function (socket, fn) {
     socket.on('plantTree', function (data, fn) {
         if (data) {
             //check if the plot exists
-            console.log(data);
             Plot.findOne({_id: data.plotId}, function (err, plot) {
                 if (data) {
                     var plant = new Plant();
                     plant.title = "First apple tree";
                     plant.state_id = 1;
                     plant.species_id = 1;
-                    console.log(plant);
                     plant.save(function (err, newPlant) {
-                        console.log("plant");
-                        console.log(err);
-                        console.log(newPlant);
                         plot.plant_id = newPlant._id;
                         plot.save(function (err, newPlot) {
-                            if (newPlot) {
-                                //TODO send back new plant via socket....
-                                console.log(newPlant);
-                                var newPlotData = {plot: plot, plant: newPlant};
-                                fn(newPlotData);
-                            }
+                            Plot(newPlot).populate('plant_id', function (err, plotAndPlant) {
+                                if (plotAndPlant) {
+                                    //TODO send back new plant via socket....
+                                    // console.log(newPlant);
+                                    // var newPlotData = plot;
+                                    fn(plotAndPlant);
+                                }
+                            });
+
                         })
                     })
                 }
@@ -142,24 +194,25 @@ function gamePlay(socket) {
 }
 
 function getUserData(socket, success) {
-    DemoUser.findOne({socket_id: socket.id}, function (err, user) {
-        // console.log("res "+user.resources_id);
-        Resources.findOne({_id: user.resources_id}, function (err, data) {
-            Plot
-                .find({user_id: user._id})
-                .populate('plant_id')
-                .exec(function (err, plots) {
-                    if (!err) {
-                        success(err, data, user, plots);
+    DemoUser.findOne({socket_id: socket.id}).populate('resources_id').exec(function (err, user) {
+        // console.log(user);
+        // // console.log("res "+user.resources_id);
+        // Resources.findOne({_id: user.resources_id}, function (err, data) {
+        Plot
+            .find({user_id: user._id})
+            .populate('plant_id')
+            .exec(function (err, plots) {
+                if (!err) {
+                    success(err, user.resources_id, user, plots);
 
-                    } else {
-                        console.log("Getting resources");
-                    }
-                });
-            //send first data....
-        });
-
+                } else {
+                    console.log("Getting resources");
+                }
+            });
+        //send first data....
     });
+
+    // });
 }
 
 // MAYBE FOR LATER.......
@@ -170,13 +223,13 @@ function POPULATEgetUserData(socket, success) {
             Plot
                 .find({user_id: user._id})
                 .populate([{
-                        path: 'plant_id',
-                        model: 'Plant',
-                        populate: {
-                            path: 'state_id',
-                            model: 'State'
-                        }
-                    },
+                    path: 'plant_id',
+                    model: 'Plant',
+                    populate: {
+                        path: 'state_id',
+                        model: 'State'
+                    }
+                },
                     {
                         path: 'plant_id',
                         model: 'Plant',

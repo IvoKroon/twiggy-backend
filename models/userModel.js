@@ -12,7 +12,7 @@ var userModel = new Schema({
     street:String,
     house_number:String,
     zip_code:String,
-    resources_id: {type: Schema.Types.ObjectId, ref: 'Resources'}
+    resources_id: {type: Schema.ObjectId, ref: 'Resources'}
 });
 
 module.exports = mongoose.model('User', userModel);
