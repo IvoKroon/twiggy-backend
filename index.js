@@ -141,7 +141,7 @@ function gamePlay(socket) {
     });
 }
 
-function getUserData2(socket, success) {
+function getUserData(socket, success) {
     DemoUser.findOne({socket_id: socket.id}, function (err, user) {
         // console.log("res "+user.resources_id);
         Resources.findOne({_id: user.resources_id}, function (err, data) {
@@ -162,7 +162,8 @@ function getUserData2(socket, success) {
     });
 }
 
-function getUserData(socket, success) {
+// MAYBE FOR LATER.......
+function POPULATEgetUserData(socket, success) {
     DemoUser.findOne({socket_id: socket.id}, function (err, user) {
         // console.log("res "+user.resources_id);
         Resources.findOne({_id: user.resources_id}, function (err, data) {
@@ -199,6 +200,8 @@ function getUserData(socket, success) {
 
     });
 }
+
+// END: MAYBE FOR LATER.......
 
 function auth(code) {
     DemoUser.findOne({hash: code}, function (err, data) {
